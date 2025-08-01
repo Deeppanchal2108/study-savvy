@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual env
+.venv/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+
+# uv lockfile (optional if you want reproducible installs)
+uv.lock
