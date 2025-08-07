@@ -30,3 +30,5 @@ Thumbs.db
 
 # Optional: skip test coverage outputs
 coverage
+
+/src/generated/prisma
