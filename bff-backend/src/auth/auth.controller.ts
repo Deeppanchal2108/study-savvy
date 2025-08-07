@@ -55,17 +55,17 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     try {
-        const user = await prisma.user.findUnique({
+        const userExist = await prisma.user.findUnique({
             where: { email },
         });
 
-        if (!user) {
+        if (!userExist) {
             return res
                 .status(400)
                 .json({ error: "User does not exist. Please sign up." });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, userExist.password);
 
         if (!isMatch) {
             return res
@@ -73,11 +73,20 @@ export const loginUser = async (req: Request, res: Response) => {
                 .json({ error: "Password doesn’t match. Please try again." });
         }
 
-        const token = generateToken(user.id);
+        const token = generateToken(userExist.id);
 
         return res.status(200).json({
             token,
             message: "Login successful",
+            user: {
+
+                id: userExist.id,
+                firstName: userExist.firstName,
+                lastName: userExist.lastName,
+                email: userExist.email
+
+                
+            }
         });
     } catch (error) {
         console.error("Error logging in user:", error);
