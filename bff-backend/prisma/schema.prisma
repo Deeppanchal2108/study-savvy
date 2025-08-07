@@ -12,14 +12,78 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-
 model User {
-
   id        String   @id @default(cuid())
   firstName String
- lastName  String
+  lastName  String
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  courses   Course[]
+}
+
+model Course {
+  id        String   @id @default(cuid())
+  title     String
+  duration  Int
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  topics    Topic[]
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  pages     Page[]
+  quizzes   Quiz[]
+  flashcards Flashcard[]
+  summary   Summary?
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+}
+
+model Quiz {
+  id        String   @id @default(cuid())
+  question  String
+  options   String[] 
+  answer    String
+  createdAt DateTime @default(now())
+
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+}
+
+model Flashcard {
+  id        String   @id @default(cuid())
+  front     String
+  back      String
+  createdAt DateTime @default(now())
+
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+}
+
+model Summary {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  topicId   String   @unique
+  topic     Topic    @relation(fields: [topicId], references: [id])
 }
