@@ -27,6 +27,7 @@ model Course {
   id        String   @id @default(cuid())
   title     String
   duration  Int
+  completed Boolean  @default(false) 
   createdAt DateTime @default(now())
 
   userId    String
@@ -38,6 +39,7 @@ model Course {
 model Topic {
   id        String   @id @default(cuid())
   title     String
+  completed Boolean  @default(false) 
   createdAt DateTime @default(now())
 
   courseId  String
@@ -51,7 +53,9 @@ model Topic {
 
 model Page {
   id        String   @id @default(cuid())
+  title     String
   content   String
+  viewed    Boolean  @default(false) 
   createdAt DateTime @default(now())
 
   topicId   String
@@ -63,16 +67,20 @@ model Quiz {
   question  String
   options   String[] 
   answer    String
+  completed Boolean  @default(false) // quiz attempt tracking
+  score     Int?
   createdAt DateTime @default(now())
 
   topicId   String
   topic     Topic    @relation(fields: [topicId], references: [id])
 }
 
+
 model Flashcard {
   id        String   @id @default(cuid())
   front     String
   back      String
+  completed Boolean  @default(false) // mark as reviewed
   createdAt DateTime @default(now())
 
   topicId   String
@@ -82,6 +90,7 @@ model Flashcard {
 model Summary {
   id        String   @id @default(cuid())
   content   String
+  completed Boolean  @default(false) // mark as read
   createdAt DateTime @default(now())
 
   topicId   String   @unique
