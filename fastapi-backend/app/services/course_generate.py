@@ -10,10 +10,6 @@ load_dotenv()
 parser_course_skeleton=PydanticOutputParser(pydantic_object=CourseSkeleton)
 parser_course=PydanticOutputParser(pydantic_object=Course)
 parser_topic=PydanticOutputParser(pydantic_object=Topic)
-parser_page=PydanticOutputParser(pydantic_object=Page)
-parser_quiz=PydanticOutputParser(pydantic_object=Quiz)
-parser_flashcard=PydanticOutputParser(pydantic_object=Flashcard)
-parser_summary=PydanticOutputParser(pydantic_object=Summary)
 
 
 course_template = PromptTemplate(
@@ -70,37 +66,42 @@ Experience (years): {experience}
 )
 
 
-def create_course():
+
+
+# this method create course that will return json which contains title duration and topics needed (with title only)
+def create_course(title:str, difficulty:str , experience :str):
     model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-    prompt=course_template.invoke({"topic":"rust", "difficulty":"hard","experience":"almost 2 months"})
+    prompt=course_template.invoke({"topic":title, "difficulty":difficulty
+                                   ,"experience":experience})
     result = model.invoke(prompt)
     course_data = parser_course_skeleton.parse(result.content)
     return course_data
 
 
 
-# the thing is we will loop over each topic given by the create_course nd then ggenerate its part alright 
-
-    
-def create_topic(title):
+# on passing single title then this method creates everything for that title only 
+def create_topic(title:str, difficulty:str , experience :str):
     model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     prompt = topic_template.invoke({
         "topic_title": title,
-        "difficulty": "hard",
-        "experience": "2 month"
+        "difficulty": difficulty,
+        "experience": experience
     })
     result = model.invoke(prompt)
     topic_data = parser_topic.parse(result.content)
     # topic_json=topic_data.model_dump_json(indent=2)
     return topic_data 
 
-def build_whole_fucking_course():
-    course_json=create_course()
+
+
+# this method loop over the title and calls the create_topic method with each topic and append then and returns the final course 
+def build_whole_fucking_course(title:str, difficulty:str , experience :str):
+    course_json=create_course(title=title, difficulty=difficulty, experience=experience)
 
     final_topics = []
 
     for topic in course_json.topics:
-        topic_detail = create_topic(topic.title)  
+        topic_detail = create_topic(title=topic.title, difficulty=difficulty, experience=experience)  
         # print(topic_detail)
         final_topics.append(topic_detail)
 
@@ -111,7 +112,5 @@ def build_whole_fucking_course():
         topics=final_topics
     )  
 
-    print(final_course.model_dump_json(indent=2))
-
-
-build_whole_fucking_course()
+    # print(final_course.model_dump_json(indent=2))
+    return final_course.model_dump_json(indent=2)
