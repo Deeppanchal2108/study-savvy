@@ -10,14 +10,7 @@ interface SignupPayload {
 }
 
 interface SignupResponse {
-    token: string;
-    message: string;
-    user: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-    };
+    message: string
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -40,11 +33,10 @@ function Signup() {
 
         try {
             const { data } = await axios.post<SignupResponse>(
-                `${API_BASE_URL}/auth/signup`,
+                `${API_BASE_URL}/api/auth/signup`,
                 newUser
             );
 
-            localStorage.setItem('token', data.token);
             toast(data.message);
         } catch (error) {
             if (axios.isAxiosError(error)) {

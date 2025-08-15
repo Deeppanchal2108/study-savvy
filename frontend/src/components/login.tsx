@@ -33,18 +33,33 @@ function Login() {
         }
 
         try {
-            
-            const { data } = await axios.post<LoginResponse>(`${API_BASE_URL}/auth/login`, credentials)
-            localStorage.setItem('token', data.token);
-            toast(data.message);
+            const { data } = await axios.post<LoginResponse>(
+                `${API_BASE_URL}/api/auth/login`,
+                credentials
+            );
+
+            localStorage.setItem("token", data.token);
+
+
+            // Show success
+            toast.success(data.message);
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                toast('Login failed:', error.response?.data);
+                const errorMessage =
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    "Login failed. Please try again.";
+                toast.error(errorMessage);
+            } else {
+                toast.error("Something went wrong. Please try again.");
+                console.error(error);
             }
-            
         }
 
     
+        setEmail("")
+        setPassword("")
     };
 
     return (

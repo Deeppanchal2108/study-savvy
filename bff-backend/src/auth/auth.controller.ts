@@ -10,6 +10,8 @@ const saltRounds = 10;
 export const registerUser = async (req: Request, res: Response) => {
     const { firstName, lastName, email, password } = req.body;
 
+
+
     if (!firstName || !email || !password) {
         return res
             .status(400)
