@@ -1,15 +1,17 @@
 
-import  { useState } from 'react'
-
+import { Routes, Route } from "react-router-dom";
+import { Landing } from "./pages/landing-page";
+import { LoginPage } from "./pages/login-page";
+import {SignupPage} from "./pages/signup-page";
 function App() {
-  const [name , setName]=useState("DEEP")
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline bg-amber-50 ">
-        Hello, Vite with React and Tailwind CSS!
-      </h1>
-      
-    </div>
+    <Routes>
+    
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+    </Routes>
   )
 }
 
