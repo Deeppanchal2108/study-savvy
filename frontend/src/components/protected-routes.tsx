@@ -6,9 +6,8 @@ import type { JSX } from "react";
 export default function ProtectedRoutes({ children }: { children?: JSX.Element }) {
 
 
-    if (isAuthenticated()) {
+    if (!isAuthenticated()) {
         return <Navigate to={'/login'} />
-
     }
     return children;
 
