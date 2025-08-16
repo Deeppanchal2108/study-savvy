@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { Response, Request } from 'express';
 import { authRouter } from './auth/auth.routes';
+import { courseRouter } from './course/course.routes';
 
 
 const app = express();
@@ -16,6 +17,7 @@ app.get('/', (req: Request, res: Response) => {
 
 
 app.use('/api/auth', authRouter)
+app.use('/course', courseRouter)
 
 
 

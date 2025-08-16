@@ -1,16 +1,40 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 from app.services.course_generate import build_whole_fucking_course
 
-router = APIRouter(prefix="/courses", tags=["courses"])
+router = APIRouter()
 
-@router.get("/")
-def create_course(
-    topic: str = Query(..., description="Topic to create the course for"),
-    difficulty: str = Query(..., description="Difficulty level, e.g. beginner, intermediate, advanced"),
-    experience: str = Query(..., description="Experience duration, e.g. '2 months', '1 year'")
-):
+@router.get("/courses/")
+async def create_course(request: Request):
     """
-    Create a course based on topic, difficulty, and experience.
+    Endpoint to generate a full course based on query parameters.
+    Expected query params:
+    - title
+    - description
+    - knowledge
+    - difficulty
+    - experience
     """
-    output_json = build_whole_fucking_course(topic, difficulty, experience)
-    return {"output": output_json}
+    # Extract query params
+    title = request.query_params.get("title")
+    description = request.query_params.get("description")
+    knowledge = request.query_params.get("knowledge", "beginner")
+    difficulty = request.query_params.get("difficulty", "beginner")
+    experience = request.query_params.get("experience", "0")
+
+    print(f"REQ CAME: {title} {description} {knowledge} {difficulty} {experience}")
+
+    try:
+        output_json = build_whole_fucking_course(
+            course_title=title,       
+            description=description,
+            knowledge=knowledge,
+            difficulty=difficulty,
+            experience=experience,
+        )
+
+        return JSONResponse(content={"course": output_json})
+
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
