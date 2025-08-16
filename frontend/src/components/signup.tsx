@@ -51,13 +51,13 @@ function Signup() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4">
-            <div className="w-full max-w-sm">
-                <h2 className="text-2xl font-semibold mb-6 text-center">Sign Up</h2>
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-background">
+            <div className="w-full max-w-md bg-card border border-border shadow-lg rounded-lg p-8">
+                <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Sign Up</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="firstName" className="block mb-1 font-medium">
+                        <label htmlFor="firstName" className="block mb-2 font-semibold text-foreground">
                             First Name
                         </label>
                         <input
@@ -66,12 +66,13 @@ function Signup() {
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
-                            className="w-full border rounded-md p-2 focus:outline-none focus:ring"
+                            className="w-full border border-input rounded-lg p-3 bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring shadow-sm transition-all"
+                            placeholder="Enter your first name"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="lastName" className="block mb-1 font-medium">
+                        <label htmlFor="lastName" className="block mb-2 font-semibold text-foreground">
                             Last Name
                         </label>
                         <input
@@ -80,12 +81,13 @@ function Signup() {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
-                            className="w-full border rounded-md p-2 focus:outline-none focus:ring"
+                            className="w-full border border-input rounded-lg p-3 bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring shadow-sm transition-all"
+                            placeholder="Enter your last name"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="block mb-1 font-medium">
+                        <label htmlFor="email" className="block mb-2 font-semibold text-foreground">
                             Email
                         </label>
                         <input
@@ -94,12 +96,13 @@ function Signup() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full border rounded-md p-2 focus:outline-none focus:ring"
+                            className="w-full border border-input rounded-lg p-3 bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring shadow-sm transition-all"
+                            placeholder="Enter your email"
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="password" className="block mb-1 font-medium">
+                        <label htmlFor="password" className="block mb-2 font-semibold text-foreground">
                             Password
                         </label>
                         <input
@@ -108,21 +111,25 @@ function Signup() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full border rounded-md p-2 focus:outline-none focus:ring"
+                            className="w-full border border-input rounded-lg p-3 bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring shadow-sm transition-all"
+                            placeholder="Enter your password"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full py-2 rounded-md font-medium bg-primary text-white hover:opacity-90 transition"
+                        className="w-full py-3 rounded-lg font-bold text-lg bg-primary text-primary-foreground border border-border shadow-md hover:shadow-lg hover:translate-y-[-2px] active:translate-y-[0px] active:shadow-sm transition-all duration-150"
                     >
                         Sign Up
                     </button>
                 </form>
 
-                <p className="mt-4 text-center text-sm">
+                <p className="mt-6 text-center text-sm text-muted-foreground">
                     Already have an account?{' '}
-                    <a href="/login" className="text-primary hover:underline">
+                    <a
+                        href="/login"
+                        className="text-primary font-semibold hover:underline hover:text-primary/80 transition-colors"
+                    >
                         Login
                     </a>
                 </p>
