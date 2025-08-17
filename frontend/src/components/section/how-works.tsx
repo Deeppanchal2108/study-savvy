@@ -8,8 +8,20 @@ import {
 
     ArrowDown
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
+import { isAuthenticated } from '@/lib/auth'
 function HowItWorks() {
+
+  const navigate =useNavigate()
+    
+           const handleClick = (path: string) => {
+                if (isAuthenticated()) {
+                    navigate("/course")
+                } else {
+                    navigate(path)
+                }
+            }
     const steps = [
         {
             number: '01',
@@ -158,7 +170,7 @@ function HowItWorks() {
 
                 <div className="text-center mt-20">
                     <div className="inline-block transform hover:-translate-y-2 transition-transform duration-300">
-                        <button className="px-16 py-6 bg-destructive text-destructive-foreground border-4 border-foreground font-bold text-2xl shadow-xl hover:shadow-2xl transition-shadow">
+                        <button onClick={() => handleClick("/login")} className="px-16 py-6 bg-destructive text-destructive-foreground border-4 border-foreground font-bold text-2xl shadow-xl hover:shadow-2xl transition-shadow" >
                             Start Your Personalized Course
                         </button>
                     </div>

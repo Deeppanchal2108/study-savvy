@@ -1,5 +1,15 @@
-
+import { useNavigate } from "react-router"
+import { isAuthenticated } from "@/lib/auth"
 function HeroSection() {
+    const navigate =useNavigate()
+
+       const handleClick = (path: string) => {
+            if (isAuthenticated()) {
+                navigate("/course")
+            } else {
+                navigate(path)
+            }
+        }
     return (
         <div className="bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -17,10 +27,10 @@ function HeroSection() {
                         </p>
 
                         <div className="flex gap-4 pt-4">
-                            <button className="px-8 py-3 bg-destructive text-destructive-foreground border-2 border-foreground font-semibold shadow-sm hover:opacity-80 transition-opacity">
+                            <button onClick={() => handleClick("/login")} className="px-8 py-3 bg-destructive text-destructive-foreground border-2 border-foreground font-semibold shadow-sm hover:opacity-80 transition-opacity">
                                 Get Started Free
                             </button>
-                            <button className="px-8 py-3 bg-secondary text-secondary-foreground border-2 border-foreground font-semibold shadow-sm hover:opacity-80 transition-opacity">
+                            <button onClick={() => handleClick("/login")} className="px-8 py-3 bg-secondary text-secondary-foreground border-2 border-foreground font-semibold shadow-sm hover:opacity-80 transition-opacity">
                                 Learn More
                             </button>
                         </div>
