@@ -1,13 +1,18 @@
 import { Router } from "express";
 
-import { createCourse } from "./course.controller";
+import { createCourse, getCourseById, getTopicById } from "./course.controller";
 const router = Router()
 
-router.post("/create-course", 
-    (req, res, next) => {
-        console.log("Hit /create-course route");
-        return createCourse(req, res);
-    }
+router.post("/create-course", createCourse
 )
 
+
+router.post("/getCourse",getCourseById
+)
+
+
+
+
+router.post("/getTopic", getTopicById
+)
 export const courseRouter = router;

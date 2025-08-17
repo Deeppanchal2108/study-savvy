@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import axios from "axios"
 import {
     Dialog,
     DialogClose,
@@ -38,36 +40,40 @@ export function PopUp() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-
-        // close popup
         setIsOpen(false)
-
-        // show loader
         setIsLoading(true)
 
         try {
             const payload = { title, description, experience, knowledge, difficulty }
-            console.log("Saving data...", payload)
+            console.log("Sending data...", payload)
 
-            // simulate step-by-step loading
+            const res = await axios.post("http://localhost:3000/course/create-course", payload)
+
             for (let i = 0; i < steps.length; i++) {
                 setCurrentStepIndex(i)
-                await new Promise((resolve) => setTimeout(resolve, 1000)) // 1s per step
+                await new Promise((resolve) => setTimeout(resolve, 1000))
             }
 
-            console.log("Saved:", payload)
+            console.log("Course saved successfully!", res.data)
 
-            // reset fields
+            toast.success(res.data?.message || "Course created successfully!")
+
+           
+        } catch (error: any) {
+            console.error("Save failed", error)
+
+            toast.error(
+                error.response?.data?.message || "Failed to create course. Please try again."
+            )
+        } finally {
+            setIsLoading(false)
+            setCurrentStepIndex(0)
+
             setTitle("")
             setDescription("")
             setExperience("")
             setKnowledge("")
             setDifficulty("")
-        } catch (error) {
-            console.error("Save failed", error)
-        } finally {
-            setIsLoading(false)
-            setCurrentStepIndex(0)
         }
     }
 

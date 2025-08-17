@@ -70,3 +70,69 @@ export const createCourse = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+export const getCourseById = async (req: Request, res: Response) => {
+    const { id, userId } = req.body;
+
+    try {
+        const course = await prisma.course.findFirst({
+            where: {
+                id,
+                userId,
+            },
+            include: {
+                topics: true, 
+            },
+        });
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        return res.status(200).json(course);
+    } catch (error) {
+        console.error("Error fetching course:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getTopicById = async (req: Request, res: Response) => {
+    const { topicId, userId } = req.body;
+
+    if (!topicId || !userId) {
+        return res.status(400).json({ message: "topicId and userId are required" });
+    }
+
+    try {
+        const topic = await prisma.topic.findFirst({
+            where: {
+                id: topicId,
+                course: {
+                    userId: userId, // ensure topic belongs to the user's course
+                },
+            },
+            include: {
+                course: {
+                    select: {
+                        id: true,
+                        title: true,
+                    },
+                },
+                pages: true,
+                quizzes: true,
+                flashcards: true,
+                summary: true,
+            },
+        });
+
+        if (!topic) {
+            return res.status(404).json({ message: "Topic not found" });
+        }
+
+        res.status(200).json(topic);
+    } catch (error) {
+        console.error("Error fetching topic:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

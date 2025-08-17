@@ -81,7 +81,6 @@ export const loginUser = async (req: Request, res: Response) => {
             token,
             message: "Login successful",
             user: {
-
                 id: userExist.id,
                 firstName: userExist.firstName,
                 lastName: userExist.lastName,
