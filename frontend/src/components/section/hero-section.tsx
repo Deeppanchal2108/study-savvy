@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 import { isAuthenticated } from "@/lib/auth"
 function HeroSection() {
     const navigate =useNavigate()

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from "sonner";
-
+import { useNavigate } from 'react-router-dom';
 interface SignupPayload {
     firstName: string;
     lastName: string;
@@ -20,6 +20,7 @@ function Signup() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate =useNavigate()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,6 +39,7 @@ function Signup() {
             );
 
             toast(data.message);
+            navigate('/login')
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 toast(`Signup failed: ${error.response?.data?.error || 'Unknown error'}`);

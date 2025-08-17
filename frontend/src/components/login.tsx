@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import axios from 'axios';
 import { toast } from "sonner"
-
+import { useNavigate } from 'react-router-dom';
 interface LoginPayload {
     email: string;
     password: string;
@@ -23,6 +23,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate=useNavigate()
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -41,6 +42,8 @@ function Login() {
             localStorage.setItem("token", data.token);
             // Show success
             toast.success(data.message);
+            navigate("/course");
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const errorMessage =
