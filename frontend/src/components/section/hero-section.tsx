@@ -5,7 +5,7 @@ function HeroSection() {
         <div className="bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    {/* Left Content */}
+                  
                     <div className="space-y-6">
                         <h1 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                             Generate. Learn. Repeat.
@@ -17,7 +17,6 @@ function HeroSection() {
                             Revolutionize your learning experience with AI-powered study tools that adapt to your pace and style. Master any subject faster than ever before.
                         </p>
 
-                        {/* CTA Buttons */}
                         <div className="flex gap-4 pt-4">
                             <button className="px-8 py-3 bg-destructive text-destructive-foreground border-2 border-foreground font-semibold shadow-sm hover:opacity-80 transition-opacity">
                                 Get Started Free
@@ -28,7 +27,6 @@ function HeroSection() {
                         </div>
                     </div>
 
-                    {/* Right Image */}
                     <div className="flex justify-center">
                         <div className="w-full max-w-md bg-card border-2 border-foreground shadow-lg">
                             <img

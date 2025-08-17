@@ -21,7 +21,7 @@ function FeatureSection() {
             title: "Flashcards",
             description: "Dynamic flashcard system with spaced repetition for optimal memory retention",
             icon: MessageSquare,
-            bgColor: "bg-chart-3",
+            bgColor: "bg-chart-5",
             textColor: "text-foreground"
         },
         {
@@ -42,13 +42,13 @@ function FeatureSection() {
             title: "AI Chatbot",
             description: "24/7 intelligent study companion to answer questions and provide guidance",
             icon: Bot,
-            bgColor: "bg-chart-5",
+            bgColor: "bg-chart-3",
             textColor: "text-foreground"
         }
     ]
 
     return (
-        <div className="bg-background py-16">
+        <div className="bg-background pb-16">
             <div className="max-w-full ">
              
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0">
