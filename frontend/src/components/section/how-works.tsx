@@ -5,7 +5,7 @@ import {
     BookOpen,
     TrendingUp,
     MessageSquare,
-    
+
     ArrowDown
 } from 'lucide-react'
 
@@ -80,12 +80,12 @@ function HowItWorks() {
 
                         return (
                             <div key={index} className="relative">
-                            
+                                {/* Step Card */}
                                 <div
                                     className={`grid lg:grid-cols-5 gap-12 items-center ${isEven ? 'lg:grid-flow-col-reverse' : ''
                                         }`}
                                 >
-                            
+                                    {/* Content Side */}
                                     <div className="lg:col-span-3 space-y-6">
                                         <div className="flex items-start gap-6">
                                             <div className="w-20 h-20 bg-foreground text-background flex items-center justify-center border-4 border-foreground shadow-lg flex-shrink-0">
@@ -103,7 +103,8 @@ function HowItWorks() {
                                             </div>
                                         </div>
                                     </div>
-=
+
+                                    {/* Visual Side */}
                                     <div className="lg:col-span-2 flex justify-center">
                                         {step.visual === 'form' ? (
                                             <div className="w-80 h-72 bg-card border-4 border-foreground shadow-xl p-6 flex flex-col justify-start gap-4 transform rotate-1 hover:rotate-0 transition-transform duration-300">
@@ -112,7 +113,7 @@ function HowItWorks() {
                                                     <span className="font-bold text-xl text-foreground">Upload Content</span>
                                                 </div>
 
-                                       
+                                                {/* Mock input fields */}
                                                 <div className="space-y-3 w-full">
                                                     <div className="h-10 bg-input border-2 border-foreground px-4 flex items-center text-sm text-muted-foreground shadow-sm">
                                                         Topic: "Linear Algebra: Vectors"
@@ -142,6 +143,7 @@ function HowItWorks() {
                                     </div>
                                 </div>
 
+                                {/* Arrow Connector */}
                                 {index < steps.length - 1 && (
                                     <div className="flex justify-center my-12">
                                         <div className="bg-foreground p-3 border-2 border-foreground shadow-md">

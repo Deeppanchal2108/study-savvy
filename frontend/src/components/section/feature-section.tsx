@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { BookOpen, MessageSquare, Video, Brain, Bot, FileText } from 'lucide-react'
 
 function FeatureSection() {
