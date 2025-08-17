@@ -4,10 +4,17 @@ import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Enhanced interfaces based on your API response
 interface Page {
@@ -21,16 +28,17 @@ interface Page {
 
 interface Quiz {
     id: string;
-    title: string;
-    questions: any[]; // You can define a more specific Question interface if needed
+    question: string;
+    answer: string;
+    options: string[];
     createdAt: string;
     topicId: string;
 }
 
 interface Flashcard {
     id: string;
-    question: string;
-    answer: string;
+    front: string;
+    back: string;
     createdAt: string;
     topicId: string;
 }
@@ -59,40 +67,50 @@ interface TopicDetails {
     summary: Summary | null;
 }
 
-// Quiz Component
-function QuizComponent({ quizzes }: { quizzes: Quiz[] }) {
+// Quiz Dialog Component
+function QuizDialog({ quizzes }: { quizzes: Quiz[] }) {
     if (!quizzes || quizzes.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Quiz</CardTitle>
-                    <CardDescription>No quizzes available for this topic</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="p-6 text-center">
+                <p className="text-muted-foreground">No quizzes available for this topic</p>
+            </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            {quizzes.map((quiz) => (
+        <div className="space-y-4 max-h-[500px] overflow-y-auto">
+            {quizzes.map((quiz, index) => (
                 <Card key={quiz.id}>
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">{quiz.title}</CardTitle>
+                            <CardTitle className="text-lg">Quiz Question {index + 1}</CardTitle>
                             <Badge variant="secondary">
-                                {quiz.questions?.length || 0} Questions
+                                {quiz.options?.length || 0} Options
                             </Badge>
                         </div>
                         <CardDescription>
-                            Test your knowledge on this topic
+                            {quiz.question}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm text-muted-foreground">
-                                Created: {new Date(quiz.createdAt).toLocaleDateString()}
+                        <div className="space-y-3">
+                            {quiz.options && quiz.options.map((option, optionIndex) => (
+                                <Button
+                                    key={optionIndex}
+                                    variant="outline"
+                                    className="w-full text-left justify-start"
+                                >
+                                    {String.fromCharCode(65 + optionIndex)}. {option}
+                                </Button>
+                            ))}
+                            <div className="pt-3 border-t">
+                                <p className="text-sm text-muted-foreground">
+                                    <strong>Answer:</strong> {quiz.answer}
+                                </p>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                    Created: {new Date(quiz.createdAt).toLocaleDateString()}
+                                </div>
                             </div>
-                            <Button>Start Quiz</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -101,19 +119,16 @@ function QuizComponent({ quizzes }: { quizzes: Quiz[] }) {
     );
 }
 
-// Flashcards Component
-function FlashcardsComponent({ flashcards }: { flashcards: Flashcard[] }) {
+// Flashcards Dialog Component
+function FlashcardsDialog({ flashcards }: { flashcards: Flashcard[] }) {
     const [currentCard, setCurrentCard] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
 
     if (!flashcards || flashcards.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Flashcards</CardTitle>
-                    <CardDescription>No flashcards available for this topic</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="p-6 text-center">
+                <p className="text-muted-foreground">No flashcards available for this topic</p>
+            </div>
         );
     }
 
@@ -138,17 +153,17 @@ function FlashcardsComponent({ flashcards }: { flashcards: Flashcard[] }) {
 
             <Progress value={((currentCard + 1) / flashcards.length) * 100} className="w-full" />
 
-            <Card className="min-h-[300px] cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
+            <Card className="min-h-[250px] cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
                 <CardContent className="flex items-center justify-center h-full p-8">
                     <div className="text-center space-y-4">
                         <Badge variant={isFlipped ? "secondary" : "default"}>
-                            {isFlipped ? "Answer" : "Question"}
+                            {isFlipped ? "Back" : "Front"}
                         </Badge>
                         <p className="text-lg leading-relaxed">
-                            {isFlipped ? flashcards[currentCard].answer : flashcards[currentCard].question}
+                            {isFlipped ? flashcards[currentCard].back : flashcards[currentCard].front}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Click to {isFlipped ? "see question" : "reveal answer"}
+                            Click to {isFlipped ? "see front" : "reveal back"}
                         </p>
                     </div>
                 </CardContent>
@@ -159,7 +174,7 @@ function FlashcardsComponent({ flashcards }: { flashcards: Flashcard[] }) {
                     Previous
                 </Button>
                 <Button onClick={() => setIsFlipped(!isFlipped)}>
-                    {isFlipped ? "Show Question" : "Show Answer"}
+                    {isFlipped ? "Show Front" : "Show Back"}
                 </Button>
                 <Button variant="outline" onClick={nextCard} disabled={flashcards.length <= 1}>
                     Next
@@ -168,66 +183,70 @@ function FlashcardsComponent({ flashcards }: { flashcards: Flashcard[] }) {
         </div>
     );
 }
-
-// Summary Component
-function SummaryComponent({ summary }: { summary: Summary | null }) {
+// Summary Dialog Component
+function SummaryDialog({ summary }: { summary: Summary | null }) {
     if (!summary) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Summary</CardTitle>
-                    <CardDescription>No summary available for this topic</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="p-6 text-center">
+                <p className="text-muted-foreground">No summary available for this topic</p>
+            </div>
         );
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Topic Summary</CardTitle>
-                <CardDescription>
-                    Key points and overview of this topic
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div>
-                    <h4 className="font-semibold mb-3">Overview</h4>
-                    <p className="text-muted-foreground leading-relaxed">{summary.content}</p>
-                </div>
+        <div className="space-y-6 max-h-[500px] overflow-y-auto">
+            <div>
+                <h4 className="font-semibold mb-3">Overview</h4>
+                <p className="text-muted-foreground leading-relaxed">{summary.content}</p>
+            </div>
 
-                {summary.keyPoints && summary.keyPoints.length > 0 && (
-                    <>
-                        <Separator />
-                        <div>
-                            <h4 className="font-semibold mb-3">Key Points</h4>
-                            <ul className="space-y-2">
-                                {summary.keyPoints.map((point, index) => (
-                                    <li key={index} className="flex items-start space-x-2">
-                                        <Badge variant="outline" className="mt-0.5 text-xs">
-                                            {index + 1}
-                                        </Badge>
-                                        <span className="text-muted-foreground">{point}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </>
-                )}
+            {summary.keyPoints && summary.keyPoints.length > 0 && (
+                <>
+                    <Separator />
+                    <div>
+                        <h4 className="font-semibold mb-3">Key Points</h4>
+                        <ul className="space-y-2">
+                            {summary.keyPoints.map((point, index) => (
+                                <li key={index} className="flex items-start space-x-2">
+                                    <Badge variant="outline" className="mt-0.5 text-xs">
+                                        {index + 1}
+                                    </Badge>
+                                    <span className="text-muted-foreground">{point}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </>
+            )}
 
-                <Separator />
-                <div className="text-sm text-muted-foreground">
-                    Last updated: {new Date(summary.createdAt).toLocaleDateString()}
-                </div>
-            </CardContent>
-        </Card>
+            <Separator />
+            <div className="text-sm text-muted-foreground">
+                Last updated: {new Date(summary.createdAt).toLocaleDateString()}
+            </div>
+        </div>
     );
 }
+function formatContent(content: string): string {
+    return content
+        // Convert **text** to <strong>text</strong> with better styling
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+        // Convert *text* to <em>text</em>
+        .replace(/\*([^*]+)\*/g, '<em class="italic text-muted-foreground">$1</em>')
+        // Convert `code` to <code>code</code> with styling
+        .replace(/`([^`]+)`/g, '<code class="bg-muted text-foreground px-1.5 py-0.5 rounded text-sm font-mono">$1</code>')
+        // Convert bullet points • to proper list items
+        .replace(/^• (.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-primary mt-1">•</span><span>$1</span></div>')
+        // Convert paragraphs (double line breaks)
+        .replace(/\n\n/g, '</p><p class="mb-4">')
+        // Convert single line breaks to <br>
+        .replace(/\n/g, '<br>')
+        // Wrap everything in a paragraph if it doesn't start with a tag
+        .replace(/^(?!<)/, '<p class="mb-4">')
+        // Close the last paragraph
+        .replace(/$/, '</p>');
+}
 
-// Pages Component
 function PagesComponent({ pages }: { pages: Page[] }) {
-    const [currentPage, setCurrentPage] = useState(0);
-
     if (!pages || pages.length === 0) {
         return (
             <Card>
@@ -247,45 +266,50 @@ function PagesComponent({ pages }: { pages: Page[] }) {
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Learning Content</h3>
                 <Badge variant="outline">
-                    Page {currentPage + 1} of {sortedPages.length}
+                    {sortedPages.length} {sortedPages.length === 1 ? 'Section' : 'Sections'}
                 </Badge>
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>{sortedPages[currentPage].title}</CardTitle>
-                    <Progress value={((currentPage + 1) / sortedPages.length) * 100} className="w-full" />
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="h-[400px] w-full">
-                        <div className="prose prose-sm max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: sortedPages[currentPage].content }} />
+                <CardContent className="p-0">
+                    <ScrollArea className="h-[600px] w-full">
+                        <div className="space-y-8 p-6">
+                            {sortedPages.map((page, index) => (
+                                <div key={page.id} className="space-y-4">
+                                    {/* Page Header */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="secondary" className="text-xs">
+                                                Section {page.pageNumber}
+                                            </Badge>
+                                            <h4 className="text-xl font-semibold">{page.title}</h4>
+                                        </div>
+                                    </div>
+
+                                    {/* Page Content */}
+                                    <div className="text-muted-foreground leading-7 space-y-4">
+                                        <div
+                                            dangerouslySetInnerHTML={{
+                                                __html: formatContent(page.content)
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Separator between pages (except last one) */}
+                                    {index < sortedPages.length - 1 && (
+                                        <Separator className="my-8" />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </ScrollArea>
                 </CardContent>
             </Card>
-
-            <div className="flex justify-between">
-                <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-                    disabled={currentPage === 0}
-                >
-                    Previous Page
-                </Button>
-                <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.min(sortedPages.length - 1, prev + 1))}
-                    disabled={currentPage === sortedPages.length - 1}
-                >
-                    Next Page
-                </Button>
-            </div>
         </div>
     );
 }
 
-// Topic Content Component
+
 interface TopicContentProps {
     topicId: string;
     topic?: Topic;
@@ -298,7 +322,7 @@ interface Topic {
     createdAt: string;
     courseId: string;
 }
- 
+
 export default function TopicContent({ topicId }: TopicContentProps) {
     const [topicDetails, setTopicDetails] = useState<TopicDetails | null>(null);
     const [loading, setLoading] = useState(false);
@@ -319,6 +343,7 @@ export default function TopicContent({ topicId }: TopicContentProps) {
                     }
                 );
                 setTopicDetails(response.data);
+                console.log("Here is the response : ", response)
             } catch (err: any) {
                 setError(err.response?.data?.message || "Failed to fetch topic details");
             } finally {
@@ -328,29 +353,13 @@ export default function TopicContent({ topicId }: TopicContentProps) {
 
         fetchTopicDetails();
     }, [topicId]);
-
     if (loading) {
         return (
-            <div className="flex h-full items-center justify-center min-h-[400px]">
-                <Card className="w-full max-w-md">
-                    <CardContent className="flex flex-col items-center justify-center p-8 space-y-4">
-                        <div className="relative">
-                            <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
-                            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-primary/30 rounded-full animate-spin animation-delay-150"></div>
-                        </div>
-                        <div className="text-center space-y-2">
-                            <p className="font-medium text-foreground">Loading Topic Content</p>
-                            <p className="text-sm text-muted-foreground">Please wait while we fetch your learning materials...</p>
-                        </div>
-                        <div className="w-full max-w-xs">
-                            <Progress value={66} className="w-full" />
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="flex h-full items-center justify-center min-h-[200px]">
+                <div className="w-6 h-6 bg-primary animate-spin"></div>
             </div>
         );
     }
-
     if (error) {
         return (
             <Card>
@@ -380,56 +389,92 @@ export default function TopicContent({ topicId }: TopicContentProps) {
 
     return (
         <div className="space-y-6">
-            {/* Topic Header */}
+            {/* Topic Header with Action Buttons */}
             <Card>
                 <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
+                    <div className="flex items-start justify-between">
+                        <div className="space-y-2">
                             <CardTitle className="text-2xl">{topicDetails.title}</CardTitle>
                             <CardDescription>
                                 {topicDetails.course.title} • Created {new Date(topicDetails.createdAt).toLocaleDateString()}
                             </CardDescription>
                         </div>
-                        <Badge variant={topicDetails.completed ? "default" : "secondary"}>
-                            {topicDetails.completed ? "Completed" : "In Progress"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            <Badge variant={topicDetails.completed ? "default" : "secondary"}>
+                                {topicDetails.completed ? "Completed" : "In Progress"}
+                            </Badge>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons Row */}
+                    <div className="flex gap-2 pt-4 border-t">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    🧠 Quiz
+                                    <Badge variant="secondary" className="ml-1">
+                                        {topicDetails.quizzes?.length || 0}
+                                    </Badge>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Quiz</DialogTitle>
+                                    <DialogDescription>
+                                        Test your knowledge on this topic
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <QuizDialog quizzes={topicDetails.quizzes} />
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    🔄 Flashcards
+                                    <Badge variant="secondary" className="ml-1">
+                                        {topicDetails.flashcards?.length || 0}
+                                    </Badge>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Flashcards</DialogTitle>
+                                    <DialogDescription>
+                                        Review key concepts with interactive flashcards
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <FlashcardsDialog flashcards={topicDetails.flashcards} />
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    📝 Summary
+                                    {topicDetails.summary && (
+                                        <Badge variant="secondary" className="ml-1">
+                                            Available
+                                        </Badge>
+                                    )}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Topic Summary</DialogTitle>
+                                    <DialogDescription>
+                                        Key points and overview of this topic
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <SummaryDialog summary={topicDetails.summary} />
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </CardHeader>
             </Card>
 
-            {/* Content Tabs */}
-            <Tabs defaultValue="content" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 h-12">
-                    <TabsTrigger value="content" className="text-sm">
-                        📚 Content ({topicDetails.pages?.length || 0})
-                    </TabsTrigger>
-                    <TabsTrigger value="quiz" className="text-sm">
-                        🧠 Quiz ({topicDetails.quizzes?.length || 0})
-                    </TabsTrigger>
-                    <TabsTrigger value="flashcards" className="text-sm">
-                        🔄 Flashcards ({topicDetails.flashcards?.length || 0})
-                    </TabsTrigger>
-                    <TabsTrigger value="summary" className="text-sm">
-                        📝 Summary
-                    </TabsTrigger>
-                </TabsList>
 
-                <TabsContent value="content" className="space-y-4 mt-6">
-                    <PagesComponent pages={topicDetails.pages} />
-                </TabsContent>
-
-                <TabsContent value="quiz" className="space-y-4 mt-6">
-                    <QuizComponent quizzes={topicDetails.quizzes} />
-                </TabsContent>
-
-                <TabsContent value="flashcards" className="space-y-4 mt-6">
-                    <FlashcardsComponent flashcards={topicDetails.flashcards} />
-                </TabsContent>
-
-                <TabsContent value="summary" className="space-y-4 mt-6">
-                    <SummaryComponent summary={topicDetails.summary} />
-                </TabsContent>
-            </Tabs>
+            <PagesComponent pages={topicDetails.pages} />
         </div>
     );
 }
