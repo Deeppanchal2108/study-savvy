@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 
-// Enhanced interfaces based on your API response
 interface Page {
     id: string;
     title: string;
@@ -276,7 +275,7 @@ function PagesComponent({ pages }: { pages: Page[] }) {
                         <div className="space-y-8 p-6">
                             {sortedPages.map((page, index) => (
                                 <div key={page.id} className="space-y-4">
-                                    {/* Page Header */}
+                            
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-3">
                                             <Badge variant="secondary" className="text-xs">
@@ -286,7 +285,6 @@ function PagesComponent({ pages }: { pages: Page[] }) {
                                         </div>
                                     </div>
 
-                                    {/* Page Content */}
                                     <div className="text-muted-foreground leading-7 space-y-4">
                                         <div
                                             dangerouslySetInnerHTML={{
@@ -295,7 +293,6 @@ function PagesComponent({ pages }: { pages: Page[] }) {
                                         />
                                     </div>
 
-                                    {/* Separator between pages (except last one) */}
                                     {index < sortedPages.length - 1 && (
                                         <Separator className="my-8" />
                                     )}
@@ -388,93 +385,110 @@ export default function TopicContent({ topicId }: TopicContentProps) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Topic Header with Action Buttons */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-start justify-between">
-                        <div className="space-y-2">
-                            <CardTitle className="text-2xl">{topicDetails.title}</CardTitle>
-                            <CardDescription>
+            <Card className="border-4 border-black shadow-[6px_6px_0_0_black] bg-card rounded-none">
+                <CardHeader className="p-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        <div className="space-y-2 flex-1">
+                            <CardTitle className="text-xl lg:text-2xl font-semibold text-card-foreground">{topicDetails.title}</CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground">
                                 {topicDetails.course.title} • Created {new Date(topicDetails.createdAt).toLocaleDateString()}
                             </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Badge variant={topicDetails.completed ? "default" : "secondary"}>
+                            <Badge
+                                className={`font-medium px-3 py-1 border-3 border-black shadow-[3px_3px_0_0_black] rounded-none text-xs ${topicDetails.completed
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-secondary text-secondary-foreground'
+                                    }`}
+                            >
                                 {topicDetails.completed ? "Completed" : "In Progress"}
                             </Badge>
                         </div>
                     </div>
 
                     {/* Action Buttons Row */}
-                    <div className="flex gap-2 pt-4 border-t">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="flex items-center gap-2">
-                                    🧠 Quiz
-                                    <Badge variant="secondary" className="ml-1">
-                                        {topicDetails.quizzes?.length || 0}
-                                    </Badge>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Quiz</DialogTitle>
-                                    <DialogDescription>
-                                        Test your knowledge on this topic
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <QuizDialog quizzes={topicDetails.quizzes} />
-                            </DialogContent>
-                        </Dialog>
+                    <div className="pt-4 border-t-3 border-black">
+                        <div className="grid grid-cols-3 gap-3">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-1 text-black hover:bg-chart-2 font-medium rounded-none text-sm"
+                                    >
+                                        <span>🧠</span>
+                                        <span>Quiz</span>
+                                        <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
+                                            {topicDetails.quizzes?.length || 0}
+                                        </div>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">
+                                    <DialogHeader>
+                                        <DialogTitle className="font-bold text-xl text-card-foreground">Quiz</DialogTitle>
+                                        <DialogDescription className="font-medium text-muted-foreground">
+                                            Test your knowledge on this topic
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <QuizDialog quizzes={topicDetails.quizzes} />
+                                </DialogContent>
+                            </Dialog>
 
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="flex items-center gap-2">
-                                    🔄 Flashcards
-                                    <Badge variant="secondary" className="ml-1">
-                                        {topicDetails.flashcards?.length || 0}
-                                    </Badge>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Flashcards</DialogTitle>
-                                    <DialogDescription>
-                                        Review key concepts with interactive flashcards
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <FlashcardsDialog flashcards={topicDetails.flashcards} />
-                            </DialogContent>
-                        </Dialog>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-2 text-black hover:bg-chart-3 font-medium rounded-none text-sm"
+                                    >
+                                        <span>🔄</span>
+                                        <span>Flashcards</span>
+                                        <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
+                                            {topicDetails.flashcards?.length || 0}
+                                        </div>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">
+                                    <DialogHeader>
+                                        <DialogTitle className="font-bold text-xl text-card-foreground">Flashcards</DialogTitle>
+                                        <DialogDescription className="font-medium text-muted-foreground">
+                                            Review key concepts with interactive flashcards
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <FlashcardsDialog flashcards={topicDetails.flashcards} />
+                                </DialogContent>
+                            </Dialog>
 
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" className="flex items-center gap-2">
-                                    📝 Summary
-                                    {topicDetails.summary && (
-                                        <Badge variant="secondary" className="ml-1">
-                                            Available
-                                        </Badge>
-                                    )}
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Topic Summary</DialogTitle>
-                                    <DialogDescription>
-                                        Key points and overview of this topic
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <SummaryDialog summary={topicDetails.summary} />
-                            </DialogContent>
-                        </Dialog>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-4 text-black hover:bg-chart-5 font-medium rounded-none text-sm"
+                                    >
+                                        <span>📝</span>
+                                        <span>Summary</span>
+                                        {topicDetails.summary && (
+                                            <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
+                                                Available
+                                            </div>
+                                        )}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">
+                                    <DialogHeader>
+                                        <DialogTitle className="font-bold text-xl text-card-foreground">Topic Summary</DialogTitle>
+                                        <DialogDescription className="font-medium text-muted-foreground">
+                                            Key points and overview of this topic
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <SummaryDialog summary={topicDetails.summary} />
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </CardHeader>
             </Card>
 
-
-            <PagesComponent pages={topicDetails.pages} />
+            <div className="border-4 border-black shadow-[8px_8px_0_0_black] bg-card rounded-none">
+                <PagesComponent pages={topicDetails.pages} />
+            </div>
         </div>
     );
 }

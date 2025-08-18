@@ -1,5 +1,4 @@
 
-import Navbar from "@/components/section/navbar";
 import HeroSection from "@/components/section/hero-section";
 import FeatureSection from "@/components/section/feature-section";
 import HowItWorks from "@/components/section/how-works";
@@ -11,7 +10,7 @@ export function Landing() {
     return (
         <>
         
-            <Navbar />
+            
             <HeroSection />
             <TypingSection/>
             <FeatureSection />

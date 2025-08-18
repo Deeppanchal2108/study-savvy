@@ -155,3 +155,47 @@ export const getAllCoursesOfUser = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
+
+export const updateTopicCompletion = async (req: Request, res: Response) => {
+    const { topicId, completed } = req.body;
+
+    if (!topicId || completed === undefined) {
+        return res.status(400).json({ message: "topicId and completed are required" });
+    }
+
+    try {
+        // 1️⃣ Update topic completion status
+        const updatedTopic = await prisma.topic.update({
+            where: { id: topicId },
+            data: { completed },
+            include: { course: true }, // include course relation to get courseId
+        });
+
+        const courseId = updatedTopic.courseId;
+
+        // 2️⃣ Fetch all topics of the course
+        const courseTopics = await prisma.topic.findMany({
+            where: { courseId },
+            select: { completed: true },
+        });
+
+        // 3️⃣ Check if every topic is completed
+        const allCompleted = courseTopics.every(t => t.completed);
+
+        // 4️⃣ Update course completion accordingly
+        await prisma.course.update({
+            where: { id: courseId },
+            data: { completed: allCompleted },
+        });
+
+        return res.status(200).json({
+            ...updatedTopic,
+            courseCompleted: allCompleted,
+        });
+    } catch (error) {
+        console.error("Error updating topic completion:", error);
+        return res.status(500).json({ message: "Failed to update topic completion" });
+    }
+};

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TopicContent from "@/components/course/topic-content";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface Topic {
     id: string;
@@ -21,16 +22,15 @@ interface Course {
 }
 
 function CoursePage() {
-    const id = "cmee3prkd0001bq78lmrmmwpf"; // You can replace this with useParams if needed
+    const id = "cmee3prkd0001bq78lmrmmwpf";
     const [course, setCourse] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+    const [updatingTopics, setUpdatingTopics] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-   
-
         const fetchCourse = async () => {
             try {
                 const response = await axios.post("http://localhost:3000/course/getCourse", {
@@ -51,14 +51,60 @@ function CoursePage() {
             }
         };
 
-
         fetchCourse();
     }, [id]);
 
     const handleTopicClick = (topicId: string) => {
         setSelectedTopic(topicId);
-        setSidebarOpen(false); // Close mobile sidebar when topic is selected
+        setSidebarOpen(false);
     };
+
+    const toggleTopicCompletion = async (topicId: string, currentStatus: boolean) => {
+        // Add to updating set to show loading state
+        setUpdatingTopics(prev => new Set(prev).add(topicId));
+
+        try {
+            // API call
+            const response = await axios.post("http://localhost:3000/course/updateTopicCompletion", {
+                topicId: topicId,
+                completed: !currentStatus,
+                userId: "cmed9n2vy0000bqd4g0t5ea2t"
+            });
+
+            // Update local state immediately for better UX
+            setCourse(prevCourse => {
+                if (!prevCourse) return prevCourse;
+
+                return {
+                    ...prevCourse,
+                    topics: prevCourse.topics.map(topic =>
+                        topic.id === topicId
+                            ? { ...topic, completed: !currentStatus }
+                            : topic
+                    )
+                };
+            });
+
+            // ✅ Show success toast
+            toast.success(
+                `Topic marked as ${!currentStatus ? "completed ✅" : "in progress ⏳"}`
+            );
+
+        } catch (err: any) {
+            console.error("Failed to update topic completion:", err);
+
+            // ❌ Show error toast
+            toast.error("Failed to update topic completion. Please try again.");
+        } finally {
+            // Remove from updating set
+            setUpdatingTopics(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(topicId);
+                return newSet;
+            });
+        }
+    };
+
 
     if (loading) {
         return (
@@ -84,107 +130,107 @@ function CoursePage() {
         );
     }
 
-    // Get the selected topic object
     const currentTopic = course.topics.find(topic => topic.id === selectedTopic);
+
+    const TopicButton = ({ topic, index }: { topic: Topic; index: number }) => {
+        const isUpdating = updatingTopics.has(topic.id);
+
+        return (
+            <button
+                onClick={() => handleTopicClick(topic.id)}
+                className={`w-full text-left p-4 transition-all duration-200 border-4 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] ${selectedTopic === topic.id
+                    ? 'bg-primary text-primary-foreground transform translate-x-[-2px] translate-y-[-2px] shadow-[6px_6px_0_0_black]'
+                    : 'bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground'
+                    }`}
+            >
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <div className={`flex-shrink-0 w-8 h-8 border-2 border-black flex items-center justify-center text-xs font-black ${topic.completed
+                            ? 'bg-green-400 text-black shadow-[2px_2px_0_0_black]'
+                            : 'bg-muted text-black shadow-[2px_2px_0_0_black]'
+                            }`}>
+                            {topic.completed ? '✓' : index + 1}
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-black text-sm uppercase">{topic.title}</div>
+                            <div className="text-xs font-bold opacity-80">
+                                {topic.completed ? 'COMPLETED' : 'NOT STARTED'}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Integrated completion toggle */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            toggleTopicCompletion(topic.id, topic.completed);
+                        }}
+                        disabled={isUpdating}
+                        className={`p-2 font-black text-xs uppercase transition-all duration-200 border-2 border-black shadow-[2px_2px_0_0_black] hover:shadow-[3px_3px_0_0_black] hover:translate-x-[-1px] hover:translate-y-[-1px] ${isUpdating
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                : topic.completed
+                                    ? 'bg-orange-400 text-black hover:bg-orange-500'
+                                    : 'bg-green-400 text-black hover:bg-green-500'
+                            }`}
+                    >
+                        {isUpdating
+                            ? '...'
+                            : topic.completed
+                                ? 'UNDO'
+                                : 'DONE'
+                        }
+                    </button>
+                </div>
+            </button>
+        );
+    };
 
     return (
         <div className="flex h-screen bg-background">
-            {/* Desktop Sidebar */}
-            <aside className="hidden md:flex w-80 bg-sidebar border-r border-sidebar-border flex-col">
-                <div className="p-6 border-b border-sidebar-border">
-                    <h2 className="text-xl font-bold text-sidebar-foreground mb-2">{course.title}</h2>
-                    <div className="text-sm text-muted-foreground">
+          
+            <aside className="hidden md:flex w-80 bg-sidebar border-r-4 border-black flex-col shadow-[8px_0_0_0_black] h-screen">
+          
+                <div className="p-6 border-b-4 border-black bg-sidebar flex-shrink-0">
+                    <h2 className="text-xl font-black text-sidebar-foreground mb-2 uppercase tracking-tight">{course.title}</h2>
+                    <div className="text-sm text-muted-foreground font-bold">
                         {course.topics.filter(t => t.completed).length} / {course.topics.length} topics completed
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
-                    <nav className="p-4 space-y-2">
+                <div className="flex-1 overflow-y-auto min-h-0">
+                    <nav className="p-4 space-y-3">
                         {course.topics.map((topic, index) => (
-                            <button
-                                key={topic.id}
-                                onClick={() => handleTopicClick(topic.id)}
-                                className={`w-full text-left p-3 rounded-lg transition-all duration-200 border ${selectedTopic === topic.id
-                                        ? 'bg-sidebar-accent border-sidebar-primary text-sidebar-accent-foreground'
-                                        : 'bg-card border-border hover:bg-sidebar-accent hover:border-sidebar-border text-card-foreground hover:text-sidebar-accent-foreground'
-                                    }`}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${topic.completed
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-muted text-muted-foreground'
-                                            }`}>
-                                            {topic.completed ? '✓' : index + 1}
-                                        </div>
-                                        <div>
-                                            <div className="font-medium text-sm">{topic.title}</div>
-                                            <div className="text-xs text-muted-foreground">
-                                                {topic.completed ? 'Completed' : 'Not started'}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </button>
+                            <TopicButton key={topic.id} topic={topic} index={index} />
                         ))}
                     </nav>
                 </div>
             </aside>
 
-            {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div className="fixed inset-0 z-50 md:hidden">
-                    {/* Backdrop */}
                     <div
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                         onClick={() => setSidebarOpen(false)}
                     />
-
-                    {/* Sidebar */}
-                    <div className="relative w-80 h-full bg-sidebar border-r border-sidebar-border flex flex-col shadow-xl">
-                        <div className="p-6 border-b border-sidebar-border flex items-center justify-between">
+                    <div className="relative w-80 h-full bg-sidebar border-r-4 border-black flex flex-col shadow-[8px_0_0_0_black]">
+                        <div className="p-6 border-b-4 border-black flex items-center justify-between bg-sidebar flex-shrink-0">
                             <div>
-                                <h2 className="text-xl font-bold text-sidebar-foreground mb-2">{course.title}</h2>
-                                <div className="text-sm text-muted-foreground">
+                                <h2 className="text-xl font-black text-sidebar-foreground mb-2 uppercase tracking-tight">{course.title}</h2>
+                                <div className="text-sm text-muted-foreground font-bold">
                                     {course.topics.filter(t => t.completed).length} / {course.topics.length} topics completed
                                 </div>
                             </div>
                             <button
                                 onClick={() => setSidebarOpen(false)}
-                                className="p-2 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground transition-colors"
+                                className="p-3 bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors border-2 border-black shadow-[2px_2px_0_0_black] hover:shadow-[4px_4px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] font-black text-lg"
                             >
                                 ✕
                             </button>
                         </div>
-
-                        <div className="flex-1 overflow-y-auto">
-                            <nav className="p-4 space-y-2">
+                        <div className="flex-1 overflow-y-auto min-h-0">
+                            <nav className="p-4 space-y-3">
                                 {course.topics.map((topic, index) => (
-                                    <button
-                                        key={topic.id}
-                                        onClick={() => handleTopicClick(topic.id)}
-                                        className={`w-full text-left p-3 rounded-lg transition-all duration-200 border ${selectedTopic === topic.id
-                                                ? 'bg-sidebar-accent border-sidebar-primary text-sidebar-accent-foreground'
-                                                : 'bg-card border-border hover:bg-sidebar-accent hover:border-sidebar-border text-card-foreground hover:text-sidebar-accent-foreground'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                                <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${topic.completed
-                                                        ? 'bg-green-500 text-white'
-                                                        : 'bg-muted text-muted-foreground'
-                                                    }`}>
-                                                    {topic.completed ? '✓' : index + 1}
-                                                </div>
-                                                <div>
-                                                    <div className="font-medium text-sm">{topic.title}</div>
-                                                    <div className="text-xs text-muted-foreground">
-                                                        {topic.completed ? 'Completed' : 'Not started'}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </button>
+                                    <TopicButton key={topic.id} topic={topic} index={index} />
                                 ))}
                             </nav>
                         </div>
@@ -192,23 +238,20 @@ function CoursePage() {
                 </div>
             )}
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col bg-background">
-                {/* Mobile Header */}
-                <div className="md:hidden p-4 border-b border-border bg-card">
+
+            <main className="flex-1 flex flex-col bg-background min-h-0">
+                <div className="md:hidden p-4 border-b-4 border-black bg-card shadow-[0_4px_0_0_black] flex-shrink-0">
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="flex items-center space-x-2 p-2 rounded-lg bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+                        className="flex items-center space-x-3 p-4 bg-sidebar text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200 border-4 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] font-black uppercase"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        <svg className="w-6 h-6 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
-                        <span className="font-medium">Course Menu</span>
+                        <span className="font-black">Course Menu</span>
                     </button>
                 </div>
-
-                {/* Content Area */}
-                <div className="flex-1 p-6">
+                <div className="flex-1 p-6 overflow-y-auto">
                     <TopicContent
                         topicId={selectedTopic || ''}
                         topic={currentTopic}
