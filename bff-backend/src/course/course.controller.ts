@@ -3,7 +3,7 @@ import prisma from "../utils/prisma";
 import axios from "axios";
 
 export const createCourse = async (req: Request, res: Response) => {
-    const { title, description, experience, knowledge, difficulty } = req.body;
+    const { title, description, experience, knowledge, difficulty ,userId } = req.body;
 
     try {
         const result = await axios.get(`${process.env.FASTAPI_BACKEND}/courses`, {
@@ -13,7 +13,6 @@ export const createCourse = async (req: Request, res: Response) => {
         const courseData = result.data.course; 
         const courseJson = JSON.parse(courseData); 
 
-        const userId = "cmed9n2vy0000bqd4g0t5ea2t";
 
         const createdCourse = await prisma.course.create({
             data: {

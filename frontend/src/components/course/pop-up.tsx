@@ -16,9 +16,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useNavigate } from "react-router-dom"
+import { getCurrentUserId } from "@/lib/userId"
 import { toast } from "sonner"
 export function PopUp() {
-    // form states
+
+    const userId=getCurrentUserId()
 
     const router = useNavigate()
 
@@ -47,17 +49,15 @@ export function PopUp() {
         setIsLoading(true)
 
         try {
-            const payload = { title, description, experience, knowledge, difficulty }
+            const payload = { title, description, experience, knowledge, difficulty , userId }
             console.log("Sending data...", payload)
 
-            // call backend (your Express endpoint)
             const res = await axios.post("http://localhost:3000/course/create-course", payload)
 
             if (res.data?.course) {
                 toast.success("Course created successfully!")
                 const createdCourse = res.data.course
 
-                // redirect to that course page
                 router(`/course/${createdCourse.id}`)
             } else {
                 toast.error("Something went wrong while creating the course.")

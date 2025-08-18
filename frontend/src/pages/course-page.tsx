@@ -33,7 +33,7 @@ function CoursePage() {
     const [updatingTopics, setUpdatingTopics] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        if (!id || !userId) return;
+     
         const fetchCourse = async () => {
             
             try {
