@@ -136,3 +136,22 @@ export const getTopicById = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const getAllCoursesOfUser = async (req: Request, res: Response) => {
+    const { userId } = req.body; // or req.params / req.query depending on route design
+
+    try {
+        const courses = await prisma.course.findMany({
+            where: { userId },
+        });
+
+        if (courses.length === 0) {
+            return res.status(404).json({ message: "No courses found for this user" });
+        }
+
+        return res.status(200).json(courses);
+    } catch (error) {
+        console.error("Error fetching courses:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
