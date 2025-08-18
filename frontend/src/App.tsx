@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/login-page";
 import ProtectedRoutes from "./components/protected-routes";
 import { SignupPage } from "./pages/signup-page";
 import CoursePage from "./pages/course-page";
+import ProfilePage from "./pages/profile-page";
 
 import CoursesPage from "./pages/courses-page";
 function App() {
@@ -27,6 +28,15 @@ function App() {
           <CoursePage />
         </ProtectedRoutes>
       } />
+
+
+      
+      <Route path="/profile/:id" element={
+        <ProtectedRoutes>
+          <ProfilePage />
+        </ProtectedRoutes>
+      } />
+
 
     </Routes>
   )
