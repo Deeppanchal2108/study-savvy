@@ -25,6 +25,7 @@ async def create_course(request: Request):
     print(f"REQ CAME: {title} {description} {knowledge} {difficulty} {experience}")
 
     try:
+        print("Req send done")
         output_json = build_whole_fucking_course(
             course_title=title,       
             description=description,
@@ -32,6 +33,7 @@ async def create_course(request: Request):
             difficulty=difficulty,
             experience=experience,
         )
+        print("resp comming ")
 
         return JSONResponse(content={"course": output_json})
 
