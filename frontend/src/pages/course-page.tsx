@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import TopicContent from "@/components/course/topic-content";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
-
+import { getCurrentUserId } from "@/lib/userId";
 interface Topic {
     id: string;
     title: string;
@@ -22,7 +23,8 @@ interface Course {
 }
 
 function CoursePage() {
-    const id = "cmee3prkd0001bq78lmrmmwpf";
+    const { id } = useParams<{ id: string }>();
+    const userId = getCurrentUserId();
     const [course, setCourse] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -31,11 +33,13 @@ function CoursePage() {
     const [updatingTopics, setUpdatingTopics] = useState<Set<string>>(new Set());
 
     useEffect(() => {
+        if (!id || !userId) return;
         const fetchCourse = async () => {
+            
             try {
                 const response = await axios.post("http://localhost:3000/course/getCourse", {
-                    id: "cmee3prkd0001bq78lmrmmwpf",
-                    userId: "cmed9n2vy0000bqd4g0t5ea2t",
+                    id,
+                    userId,
                 });
 
                 const data = response.data;
@@ -64,14 +68,13 @@ function CoursePage() {
         setUpdatingTopics(prev => new Set(prev).add(topicId));
 
         try {
-            // API call
+         
             const response = await axios.post("http://localhost:3000/course/updateTopicCompletion", {
                 topicId: topicId,
                 completed: !currentStatus,
-                userId: "cmed9n2vy0000bqd4g0t5ea2t"
+                userId
             });
 
-            // Update local state immediately for better UX
             setCourse(prevCourse => {
                 if (!prevCourse) return prevCourse;
 
@@ -93,10 +96,9 @@ function CoursePage() {
         } catch (err: any) {
             console.error("Failed to update topic completion:", err);
 
-            // ❌ Show error toast
             toast.error("Failed to update topic completion. Please try again.");
         } finally {
-            // Remove from updating set
+           
             setUpdatingTopics(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(topicId);
@@ -158,8 +160,6 @@ function CoursePage() {
                             </div>
                         </div>
                     </div>
-
-                    {/* Integrated completion toggle */}
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
