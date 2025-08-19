@@ -15,6 +15,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { getCurrentUserId } from "@/lib/userId";
 
 interface Page {
     id: string;
@@ -321,6 +322,8 @@ interface Topic {
 }
 
 export default function TopicContent({ topicId }: TopicContentProps) {
+
+    const userId=getCurrentUserId()
     const [topicDetails, setTopicDetails] = useState<TopicDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -336,7 +339,7 @@ export default function TopicContent({ topicId }: TopicContentProps) {
                     "http://localhost:3000/course/getTopic",
                     {
                         topicId: topicId,
-                        userId: "cmed9n2vy0000bqd4g0t5ea2t", // You might want to get this from context/props
+                        userId 
                     }
                 );
                 setTopicDetails(response.data);

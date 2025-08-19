@@ -66,20 +66,18 @@ export const editSkills = async (req: Request, res: Response) => {
 
 export const editUser = async (req: Request, res: Response) => {
     try {
-       
-        const { firstName, lastName, email, password, imageUrl , userId} = req.body;
+        const { firstName, lastName, email, password, imageUrl, skills , userId} = req.body;
 
         const data: any = {};
-
         if (firstName !== undefined) data.firstName = firstName;
         if (lastName !== undefined) data.lastName = lastName;
         if (email !== undefined) data.email = email;
-        if (password !== undefined) data.password = password; 
+        if (password !== undefined) data.password = password;
         if (imageUrl !== undefined) data.imageUrl = imageUrl;
-
+        if (skills !== undefined) data.skills = skills; // support updating skills too
 
         const updatedUser = await prisma.user.update({
-            where: { id: userId },
+            where: { id:userId },
             data,
             select: {
                 id: true,
