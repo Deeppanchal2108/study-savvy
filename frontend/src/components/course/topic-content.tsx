@@ -4,9 +4,14 @@ import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import QuizDialog from "./quiz-dialog";
+import type { Quiz } from "./quiz-dialog";
+import type { Flashcard } from "./flashcard-dialog";
+import FlashcardsDialog from "./flashcard-dialog";
+
 import {
     Dialog,
     DialogContent,
@@ -16,6 +21,8 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { getCurrentUserId } from "@/lib/userId";
+import SummaryDialog from "./summary-dialog";
+import type { Summary } from "./summary-dialog";
 
 interface Page {
     id: string;
@@ -26,30 +33,7 @@ interface Page {
     topicId: string;
 }
 
-interface Quiz {
-    id: string;
-    question: string;
-    answer: string;
-    options: string[];
-    createdAt: string;
-    topicId: string;
-}
 
-interface Flashcard {
-    id: string;
-    front: string;
-    back: string;
-    createdAt: string;
-    topicId: string;
-}
-
-interface Summary {
-    id: string;
-    content: string;
-    keyPoints: string[];
-    createdAt: string;
-    topicId: string;
-}
 
 interface TopicDetails {
     id: string;
@@ -67,165 +51,7 @@ interface TopicDetails {
     summary: Summary | null;
 }
 
-// Quiz Dialog Component
-function QuizDialog({ quizzes }: { quizzes: Quiz[] }) {
-    if (!quizzes || quizzes.length === 0) {
-        return (
-            <div className="p-6 text-center">
-                <p className="text-muted-foreground">No quizzes available for this topic</p>
-            </div>
-        );
-    }
 
-    return (
-        <div className="space-y-4 max-h-[500px] overflow-y-auto">
-            {quizzes.map((quiz, index) => (
-                <Card key={quiz.id}>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Quiz Question {index + 1}</CardTitle>
-                            <Badge variant="secondary">
-                                {quiz.options?.length || 0} Options
-                            </Badge>
-                        </div>
-                        <CardDescription>
-                            {quiz.question}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-3">
-                            {quiz.options && quiz.options.map((option, optionIndex) => (
-                                <Button
-                                    key={optionIndex}
-                                    variant="outline"
-                                    className="w-full text-left justify-start"
-                                >
-                                    {String.fromCharCode(65 + optionIndex)}. {option}
-                                </Button>
-                            ))}
-                            <div className="pt-3 border-t">
-                                <p className="text-sm text-muted-foreground">
-                                    <strong>Answer:</strong> {quiz.answer}
-                                </p>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                    Created: {new Date(quiz.createdAt).toLocaleDateString()}
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
-    );
-}
-
-// Flashcards Dialog Component
-function FlashcardsDialog({ flashcards }: { flashcards: Flashcard[] }) {
-    const [currentCard, setCurrentCard] = useState(0);
-    const [isFlipped, setIsFlipped] = useState(false);
-
-    if (!flashcards || flashcards.length === 0) {
-        return (
-            <div className="p-6 text-center">
-                <p className="text-muted-foreground">No flashcards available for this topic</p>
-            </div>
-        );
-    }
-
-    const nextCard = () => {
-        setIsFlipped(false);
-        setCurrentCard((prev) => (prev + 1) % flashcards.length);
-    };
-
-    const prevCard = () => {
-        setIsFlipped(false);
-        setCurrentCard((prev) => (prev - 1 + flashcards.length) % flashcards.length);
-    };
-
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Flashcards</h3>
-                <Badge variant="outline">
-                    {currentCard + 1} / {flashcards.length}
-                </Badge>
-            </div>
-
-            <Progress value={((currentCard + 1) / flashcards.length) * 100} className="w-full" />
-
-            <Card className="min-h-[250px] cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
-                <CardContent className="flex items-center justify-center h-full p-8">
-                    <div className="text-center space-y-4">
-                        <Badge variant={isFlipped ? "secondary" : "default"}>
-                            {isFlipped ? "Back" : "Front"}
-                        </Badge>
-                        <p className="text-lg leading-relaxed">
-                            {isFlipped ? flashcards[currentCard].back : flashcards[currentCard].front}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            Click to {isFlipped ? "see front" : "reveal back"}
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="flex justify-between">
-                <Button variant="outline" onClick={prevCard} disabled={flashcards.length <= 1}>
-                    Previous
-                </Button>
-                <Button onClick={() => setIsFlipped(!isFlipped)}>
-                    {isFlipped ? "Show Front" : "Show Back"}
-                </Button>
-                <Button variant="outline" onClick={nextCard} disabled={flashcards.length <= 1}>
-                    Next
-                </Button>
-            </div>
-        </div>
-    );
-}
-// Summary Dialog Component
-function SummaryDialog({ summary }: { summary: Summary | null }) {
-    if (!summary) {
-        return (
-            <div className="p-6 text-center">
-                <p className="text-muted-foreground">No summary available for this topic</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-6 max-h-[500px] overflow-y-auto">
-            <div>
-                <h4 className="font-semibold mb-3">Overview</h4>
-                <p className="text-muted-foreground leading-relaxed">{summary.content}</p>
-            </div>
-
-            {summary.keyPoints && summary.keyPoints.length > 0 && (
-                <>
-                    <Separator />
-                    <div>
-                        <h4 className="font-semibold mb-3">Key Points</h4>
-                        <ul className="space-y-2">
-                            {summary.keyPoints.map((point, index) => (
-                                <li key={index} className="flex items-start space-x-2">
-                                    <Badge variant="outline" className="mt-0.5 text-xs">
-                                        {index + 1}
-                                    </Badge>
-                                    <span className="text-muted-foreground">{point}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </>
-            )}
-
-            <Separator />
-            <div className="text-sm text-muted-foreground">
-                Last updated: {new Date(summary.createdAt).toLocaleDateString()}
-            </div>
-        </div>
-    );
-}
 function formatContent(content: string): string {
     return content
         // Convert **text** to <strong>text</strong> with better styling
