@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Mail, User, Calendar, XCircle, BookOpen, Clock, CheckCircle, Target } from "lucide-react";
 import axios from "axios";
 import PopUpEdit from "./pop-up-edit";
+import LogoutButton from "../logout";
 
 interface Course {
   id: string;
@@ -285,9 +286,12 @@ function InfoPart({ userId }: InfoPartProps) {
               <p className="text-black font-bold">No courses enrolled yet.</p>
             </div>
           )}
+
         </div>
       </div>
 
+
+      <LogoutButton />
     </div>
   );
 }

@@ -1,7 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+
 export interface Quiz {
     id: string;
     question: string;
@@ -12,6 +13,9 @@ export interface Quiz {
 }
 
 export default function QuizDialog({ quizzes }: { quizzes: Quiz[] }) {
+    const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: number }>({});
+    const [showAnswers, setShowAnswers] = useState<{ [key: string]: boolean }>({});
+
     if (!quizzes || quizzes.length === 0) {
         return (
             <div className="p-6 text-center">
@@ -19,6 +23,47 @@ export default function QuizDialog({ quizzes }: { quizzes: Quiz[] }) {
             </div>
         );
     }
+
+    const handleOptionClick = (quizId: string, optionIndex: number) => {
+        setSelectedAnswers(prev => ({ ...prev, [quizId]: optionIndex }));
+        setShowAnswers(prev => ({ ...prev, [quizId]: true }));
+    };
+
+    const getCorrectAnswerIndex = (quiz: Quiz) => {
+        return quiz.options.findIndex(option => option === quiz.answer);
+    };
+
+    const getButtonVariant = (quizId: string, optionIndex: number, quiz: Quiz) => {
+        if (!showAnswers[quizId]) return "outline";
+
+        const correctIndex = getCorrectAnswerIndex(quiz);
+        const selectedIndex = selectedAnswers[quizId];
+
+        if (optionIndex === correctIndex) {
+            return "default";
+        } else if (optionIndex === selectedIndex && selectedIndex !== correctIndex) {
+            return "destructive";
+        }
+
+        return "outline";
+    };
+
+    const getButtonClassName = (quizId: string, optionIndex: number, quiz: Quiz) => {
+        let className = "w-full text-left justify-start h-auto min-h-[2.5rem] py-3 px-4 whitespace-normal break-words";
+
+        if (showAnswers[quizId]) {
+            const correctIndex = getCorrectAnswerIndex(quiz);
+            const selectedIndex = selectedAnswers[quizId];
+
+            if (optionIndex === correctIndex) {
+                className += " bg-green-100 border-green-500 text-green-800 hover:bg-green-200";
+            } else if (optionIndex === selectedIndex && selectedIndex !== correctIndex) {
+                className += " bg-red-100 border-red-500 text-red-800 hover:bg-red-200";
+            }
+        }
+
+        return className;
+    };
 
     return (
         <div className="space-y-4 max-h-[500px] overflow-y-auto">
@@ -40,20 +85,36 @@ export default function QuizDialog({ quizzes }: { quizzes: Quiz[] }) {
                             {quiz.options && quiz.options.map((option, optionIndex) => (
                                 <Button
                                     key={optionIndex}
-                                    variant="outline"
-                                    className="w-full text-left justify-start"
+                                    variant={getButtonVariant(quiz.id, optionIndex, quiz)}
+                                    className={getButtonClassName(quiz.id, optionIndex, quiz)}
+                                    onClick={() => handleOptionClick(quiz.id, optionIndex)}
+                                    disabled={showAnswers[quiz.id]}
                                 >
-                                    {String.fromCharCode(65 + optionIndex)}. {option}
+                                    <span className="inline-block">
+                                        <span className="font-semibold">{String.fromCharCode(65 + optionIndex)}.</span>{" "}
+                                        <span>{option}</span>
+                                    </span>
                                 </Button>
                             ))}
-                            <div className="pt-3 border-t">
-                                <p className="text-sm text-muted-foreground">
-                                    <strong>Answer:</strong> {quiz.answer}
-                                </p>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                    Created: {new Date(quiz.createdAt).toLocaleDateString()}
+                            {showAnswers[quiz.id] && (
+                                <div className="pt-3 border-t">
+                                    <p className="text-sm text-muted-foreground">
+                                        <strong>Correct Answer:</strong> {quiz.answer}
+                                    </p>
+                                    {selectedAnswers[quiz.id] === getCorrectAnswerIndex(quiz) ? (
+                                        <p className="text-sm text-green-600 font-medium mt-1">
+                                            ✓ Correct! Well done.
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm text-red-600 font-medium mt-1">
+                                            ✗ Incorrect. The correct answer is highlighted in green.
+                                        </p>
+                                    )}
+                                    <div className="text-xs text-muted-foreground mt-2">
+                                        Created: {new Date(quiz.createdAt).toLocaleDateString()}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

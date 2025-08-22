@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
-
 import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import QuizDialog from "./quiz-dialog";
 import type { Quiz } from "./quiz-dialog";
 import type { Flashcard } from "./flashcard-dialog";
 import FlashcardsDialog from "./flashcard-dialog";
-
 import {
     Dialog,
     DialogContent,
@@ -23,15 +18,8 @@ import {
 import { getCurrentUserId } from "@/lib/userId";
 import SummaryDialog from "./summary-dialog";
 import type { Summary } from "./summary-dialog";
-
-interface Page {
-    id: string;
-    title: string;
-    content: string;
-    pageNumber: number;
-    createdAt: string;
-    topicId: string;
-}
+import PagesComponent from "./page-component";
+import type { Page } from "./page-component";
 
 
 
@@ -52,86 +40,8 @@ interface TopicDetails {
 }
 
 
-function formatContent(content: string): string {
-    return content
-        // Convert **text** to <strong>text</strong> with better styling
-        .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
-        // Convert *text* to <em>text</em>
-        .replace(/\*([^*]+)\*/g, '<em class="italic text-muted-foreground">$1</em>')
-        // Convert `code` to <code>code</code> with styling
-        .replace(/`([^`]+)`/g, '<code class="bg-muted text-foreground px-1.5 py-0.5 rounded text-sm font-mono">$1</code>')
-        // Convert bullet points • to proper list items
-        .replace(/^• (.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-primary mt-1">•</span><span>$1</span></div>')
-        // Convert paragraphs (double line breaks)
-        .replace(/\n\n/g, '</p><p class="mb-4">')
-        // Convert single line breaks to <br>
-        .replace(/\n/g, '<br>')
-        // Wrap everything in a paragraph if it doesn't start with a tag
-        .replace(/^(?!<)/, '<p class="mb-4">')
-        // Close the last paragraph
-        .replace(/$/, '</p>');
-}
 
-function PagesComponent({ pages }: { pages: Page[] }) {
-    if (!pages || pages.length === 0) {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Content</CardTitle>
-                    <CardDescription>No content pages available for this topic</CardDescription>
-                </CardHeader>
-            </Card>
-        );
-    }
 
-    // Sort pages by page number
-    const sortedPages = [...pages].sort((a, b) => a.pageNumber - b.pageNumber);
-
-    return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Learning Content</h3>
-                <Badge variant="outline">
-                    {sortedPages.length} {sortedPages.length === 1 ? 'Section' : 'Sections'}
-                </Badge>
-            </div>
-
-            <Card>
-                <CardContent className="p-0">
-                    <ScrollArea className="h-[600px] w-full">
-                        <div className="space-y-8 p-6">
-                            {sortedPages.map((page, index) => (
-                                <div key={page.id} className="space-y-4">
-                            
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <Badge variant="secondary" className="text-xs">
-                                                Section {page.pageNumber}
-                                            </Badge>
-                                            <h4 className="text-xl font-semibold">{page.title}</h4>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-muted-foreground leading-7 space-y-4">
-                                        <div
-                                            dangerouslySetInnerHTML={{
-                                                __html: formatContent(page.content)
-                                            }}
-                                        />
-                                    </div>
-
-                                    {index < sortedPages.length - 1 && (
-                                        <Separator className="my-8" />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
-            </Card>
-        </div>
-    );
-}
 
 
 interface TopicContentProps {
@@ -245,11 +155,11 @@ export default function TopicContent({ topicId }: TopicContentProps) {
                                     <Button
                                         className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-1 text-black hover:bg-chart-2 font-medium rounded-none text-sm"
                                     >
-                                        <span>🧠</span>
+                                        {/* <span>🧠</span> */}
                                         <span>Quiz</span>
-                                        <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
+                                        {/* <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
                                             {topicDetails.quizzes?.length || 0}
-                                        </div>
+                                        </div> */}
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">
@@ -268,11 +178,11 @@ export default function TopicContent({ topicId }: TopicContentProps) {
                                     <Button
                                         className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-2 text-black hover:bg-chart-3 font-medium rounded-none text-sm"
                                     >
-                                        <span>🔄</span>
+                                        {/* <span>🔄</span> */}
                                         <span>Flashcards</span>
-                                        <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
+                                        {/* <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
                                             {topicDetails.flashcards?.length || 0}
-                                        </div>
+                                        </div> */}
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">
@@ -291,13 +201,13 @@ export default function TopicContent({ topicId }: TopicContentProps) {
                                     <Button
                                         className="flex items-center gap-2 p-3 h-auto border-3 border-black shadow-[4px_4px_0_0_black] hover:shadow-[6px_6px_0_0_black] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 bg-chart-4 text-black hover:bg-chart-5 font-medium rounded-none text-sm"
                                     >
-                                        <span>📝</span>
+                                        {/* <span>📝</span> */}
                                         <span>Summary</span>
-                                        {topicDetails.summary && (
+                                        {/* {topicDetails.summary && (
                                             <div className="px-1.5 py-0.5 bg-muted text-muted-foreground border-2 border-black shadow-[1px_1px_0_0_black] font-medium text-xs rounded-none">
                                                 Available
                                             </div>
-                                        )}
+                                        )} */}
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl border-4 border-black shadow-[12px_12px_0_0_black] bg-card rounded-none">

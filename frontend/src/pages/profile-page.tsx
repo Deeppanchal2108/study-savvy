@@ -3,6 +3,7 @@ import { getCurrentUserId } from '@/lib/userId'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
+
 function ProfilePage() {
   const userId = getCurrentUserId()
   const navigate = useNavigate()
@@ -23,7 +24,8 @@ function ProfilePage() {
   return (
     <div>
       <InfoPart userId={userId} />
-  
+      
+
     </div>
   )
 }
